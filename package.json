@@ -1,0 +1,15 @@
+{
+  "name": "cli_store",
+  "version": "1.0.0",
+  "description": "Command line store with SQL database",
+  "main": "customer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryan K Alldrin",
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "^7.0.0",
+    "mysql": "^2.17.1"
+  }
+}
