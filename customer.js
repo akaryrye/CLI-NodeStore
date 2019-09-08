@@ -18,7 +18,7 @@ function initialPrompt() {
                 type: 'list',
                 name: "choices",
                 message: "Select from the following options:",
-                choices: ["display goods", "buy item", "add item", "exit"]
+                choices: ["display goods", "buy item", "add item", "update item quantity", "exit"]
             }
         ])
         .then(input => {
@@ -28,13 +28,14 @@ function initialPrompt() {
                 buyPrompt();
             } else if (input.choices === 'add item') {
                 addItemPrompt();
+            } else if (input.choices === 'update item quantity') {
+                updatePrompt();
             } else if (input.choices === 'exit') {
                 connection.end();
                 console.log("Have a nice day!");
                 process.exit(0);
             }
         });
-
 }
 
 function buyPrompt() {
@@ -78,6 +79,23 @@ function addItemPrompt() {
         }
     ]).then(input => {
         addItem(input.itemName, input.itemPrice, input.itemQuantity, input.itemDescription);
+    });
+}
+
+function updatePrompt() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Please enter the ID of the item you want to update: ',
+            name: 'itemId',
+        },
+        {
+            type: 'input',
+            message: 'Please enter the number of items to add to inventory: ',
+            name: 'howMany'
+        }
+    ]).then(input => {
+        updateQuantity(input.howMany, input.itemId);
     });
 }
 
@@ -130,13 +148,18 @@ function addItem(name, price, quantity, description) {
     });
 }
 
-/* function updateQuantity(num, id) {
-    connection.query('SELECT quantity FROM products WHERE id = ?', )
-    
-    connection.query('UPDATE products SET quantity = ? WHERE id = ?', [num, id], function (error, response, fields) {
+function updateQuantity(num, id) {
+    connection.query('SELECT quantity FROM products WHERE id = ?', id, function (error, response, fields) {
         if (error) throw error;
+        let oldQuantity = parseInt(response[0].quantity);
+        let newQuantity = oldQuantity + parseInt(num);
+        connection.query('UPDATE products SET quantity = ? WHERE id = ?', [newQuantity, id], function (error, response, fields) {
+            if (error) throw error;
+            console.log(`\n-------------\nQuantity successfully updated from ${oldQuantity} to ${newQuantity}\n-------------\n`);
+            initialPrompt();
+        });
     });
-} */
+}
 
 // Display the current stock when program opens
 displayGoods();
