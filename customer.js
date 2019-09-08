@@ -18,7 +18,7 @@ function initialPrompt() {
                 type: 'list',
                 name: "choices",
                 message: "Select from the following options:",
-                choices: ["display goods", "buy item", "exit"]
+                choices: ["display goods", "buy item", "add item", "exit"]
             }
         ])
         .then(input => {
@@ -26,9 +26,11 @@ function initialPrompt() {
                 displayGoods();
             } else if (input.choices === 'buy item') {
                 buyPrompt();
+            } else if (input.choices === 'add item') {
+                addItemPrompt();
             } else if (input.choices === 'exit') {
                 connection.end();
-                console.log("Have a nice day!")
+                console.log("Have a nice day!");
                 process.exit(0);
             }
         });
@@ -48,7 +50,34 @@ function buyPrompt() {
             name: 'howMany'
         }
     ]).then(input => {
-        changeQuantity(input.itemId, input.howMany);
+        buyItem(input.itemId, input.howMany);
+    });
+}
+
+function addItemPrompt() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Name: ',
+            name: 'itemName',
+        },
+        {
+            type: 'input',
+            message: 'Price: ',
+            name: 'itemPrice'
+        },
+        {
+            type: 'input',
+            message: 'Quantity: ',
+            name: 'itemQuantity'
+        },
+        {
+            type: 'input',
+            message: 'Enter a description: ',
+            name: 'itemDescription'
+        }
+    ]).then(input => {
+        addItem(input.itemName, input.itemPrice, input.itemQuantity, input.itemDescription);
     });
 }
 
@@ -70,7 +99,7 @@ function displayGoods() {
     });
 }
 
-function changeQuantity(item, num) {
+function buyItem(item, num) {
     connection.query("SELECT id, name, price, quantity FROM products WHERE ID = ?", item, function (err, res, fields) {
         if (err) throw err;
         console.log("\n==============\n")
@@ -92,6 +121,22 @@ function changeQuantity(item, num) {
         }
     });
 }
+
+function addItem(name, price, quantity, description) {
+    connection.query('INSERT INTO products SET name = ?, price = ?, quantity = ?, description = ?', [name, price, quantity, description], function (error, response, fields) {
+        if (error) throw error;
+        console.log('item successfully added');
+        initialPrompt();
+    });
+}
+
+/* function updateQuantity(num, id) {
+    connection.query('SELECT quantity FROM products WHERE id = ?', )
+    
+    connection.query('UPDATE products SET quantity = ? WHERE id = ?', [num, id], function (error, response, fields) {
+        if (error) throw error;
+    });
+} */
 
 // Display the current stock when program opens
 displayGoods();
